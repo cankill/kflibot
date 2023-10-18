@@ -1,4 +1,16 @@
+val config_version: String by project
+val telegram_bot_version: String by project
+val consume_xml_version: String by project
+val coroutines_version: String by project
 val ktor_version: String by project
+val exposedVersion: String by project
+val mariaDb_version: String by project
+val hikari_version: String by project
+val kotlin_logging_version: String by project
+val logback_version: String by project
+val mockk_version: String by project
+val atrium_version: String by project
+
 
 plugins {
     kotlin("jvm") version "1.9.10"
@@ -13,35 +25,38 @@ repositories {
 }
 
 dependencies {
-    implementation("com.typesafe:config:1.4.2")
-
-    implementation("eu.vendeli:telegram-bot:3.1.0")
-
-    implementation("com.gitlab.mvysny.konsume-xml:konsume-xml:1.0")
-
-
-//    implementation("io.arrow-kt:arrow-core:1.2.1")
-//    implementation("io.arrow-kt:arrow-fx-coroutines:1.2.1")
-//    implementation("io.arrow-kt:arrow-fx-resilience:1.1.6-alpha.81")
-//    implementation("io.arrow-kt:arrow-core-extensions:0.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk9:1.7.3")
-    implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
-    implementation("ch.qos.logback:logback-classic:1.4.11")
-
+    // Config
+    implementation("com.typesafe:config:$config_version")
+    // Telegram
+    implementation("eu.vendeli:telegram-bot:$telegram_bot_version")
+    // XML parsing
+    implementation("com.gitlab.mvysny.konsume-xml:konsume-xml:$consume_xml_version")
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$coroutines_version")
+    // Ktor client
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
-//    implementation("io.ktor:ktor-client-jetty:$ktor_version")
+    implementation("io.ktor:ktor-client-logging:$ktor_version")
     implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     implementation("io.ktor:ktor-serialization-kotlinx-xml:$ktor_version")
-    implementation("io.ktor:ktor-client-logging:$ktor_version")
-    implementation("io.ktor:ktor-client-cio-jvm:2.3.4")
+    // Exposed
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-json:$exposedVersion")
+    // DB
+    implementation("org.mariadb.jdbc:mariadb-java-client:$mariaDb_version")
+    implementation("com.zaxxer:HikariCP:$hikari_version")
+    //Logging
+    implementation("io.github.oshai:kotlin-logging-jvm:$kotlin_logging_version")
+    implementation("ch.qos.logback:logback-classic:$logback_version")
 
-    testImplementation("io.ktor:ktor-client-mock:$ktor_version")
+    // Tests
     testImplementation(kotlin("test"))
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("io.mockk:mockk:1.13.7")
-    testImplementation("org.assertj:assertj-core:3.24.2")
+    testImplementation("io.ktor:ktor-client-mock:$ktor_version")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version")
+    testImplementation("io.mockk:mockk:$mockk_version")
+    testImplementation("ch.tutteli.atrium:atrium-fluent:$atrium_version")
 }
 
 tasks.test {

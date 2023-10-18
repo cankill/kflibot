@@ -10,7 +10,7 @@ services:
     stdin_open: true
     ports:
       - 3306:3306
-      #    command: ./build.sh $PWD
+#    command: ./download.sh
     environment:
       - MARIADB_ROOT_PASSWORD=rootPassword
       - MARIADB_DATABASE=flibot
