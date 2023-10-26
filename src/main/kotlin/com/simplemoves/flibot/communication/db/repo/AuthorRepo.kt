@@ -11,7 +11,8 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 class AuthorRepo {
     suspend fun findAuthor(query: String): List<BookModel> {
         val lowerCaseQuery = query.lowercase()
-        return newSuspendedTransaction(Dispatchers.IO) {
+        return newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
             repetitionAttempts = 1
 
             val res = AuthorNameTable
@@ -33,11 +34,11 @@ class AuthorRepo {
                     SeriesTable.seriesNumber,
                 )
                 .select((
-                        (AuthorNameTable.firstName.lowerCase() like "%$lowerCaseQuery%") or
-                        (AuthorNameTable.middleName.lowerCase() like "%$lowerCaseQuery%") or
-                        (AuthorNameTable.lastName.lowerCase() like "%$lowerCaseQuery%") or
-                        (AuthorNameTable.nickName.lowerCase() like "%$lowerCaseQuery%")) and
-                        (BookTable.deleted eq '0'))
+                            (AuthorNameTable.firstName like lowerCaseQuery) or
+//                            (AuthorNameTable.middleName like lowerCaseQuery) or
+                            (AuthorNameTable.lastName like lowerCaseQuery)
+//                            (AuthorNameTable.nickName like lowerCaseQuery)
+                        ) and (BookTable.deleted eq '0'))
                 .orderBy(
                     AuthorNameTable.lastName to SortOrder.ASC,
                     SeriesNameTable.seriesName to SortOrder.ASC,

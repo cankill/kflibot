@@ -4,6 +4,12 @@ import com.typesafe.config.Config
 
 class Configuration(config: Config) {
     val db = DbConfiguration(config.getConfig("db"))
+    val telegramBot = TelegramBotConfiguration(config.getConfig("telegram-bot"))
+
+    val tmpDir = kotlin.io.path.createTempDirectory("kflibot")
+    init {
+        tmpDir.toFile().deleteOnExit()
+    }
 }
 
 class DbConfiguration(config: Config) {
@@ -16,4 +22,9 @@ class DbConfiguration(config: Config) {
     val poolSize = config.getInt("pool-size")
 
     val jdbcUrl = "jdbc:mariadb://$host:$port/$name"
+}
+
+class TelegramBotConfiguration(config: Config) {
+    val authToken = config.getString("auth-token")
+    val timeout = config.getInt("timeout")
 }

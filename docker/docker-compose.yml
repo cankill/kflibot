@@ -1,18 +1,47 @@
 version: '3.9'
 services:
+  filibustier:
+    build:
+      context: filibustier
+      dockerfile: Dockerfile
+    container_name: filibustier
+    init: true
+    tty: true
+    stdin_open: true
+    environment:
+      - DB_HOST=maria-db
+
   maria-db:
     build:
-      context: .
+      context: maria-db
       dockerfile: Dockerfile
     container_name: maria-db
     init: true
     tty: true
     stdin_open: true
-    ports:
-      - 3306:3306
+#    ports:
+#      - 3306:3306
 #    command: ./download.sh
     environment:
       - MARIADB_ROOT_PASSWORD=rootPassword
       - MARIADB_DATABASE=flibot
       - MARIADB_USER=sysadm
       - MARIADB_PASSWORD=password_to_change
+
+  proxy:
+      image: osminogin/tor-simple
+      container_name: proxy
+      restart: always
+      ports:
+        - 9050:9050
+
+#      depends_on:
+#        - nginx
+
+#  nginx:
+#    image: nginx
+#    restart: always
+##    links:
+##      - drupal:drupalhost
+#    volumes:
+#      - nginx/nginx.conf:/etc/nginx/nginx.conf:ro

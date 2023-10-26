@@ -1,12 +1,15 @@
 package com.simplemoves.flibot
 
+import com.simplemoves.flibot.communication.http.KHttpClientProvider
 import com.simplemoves.flibot.communication.db.connection.MariaDbConnection
-import com.simplemoves.flibot.communication.db.repo.AuthorRepo
-import com.simplemoves.flibot.communication.db.repo.BookRepo
-import com.simplemoves.flibot.communication.db.repo.SeriesRepo
+import com.simplemoves.flibot.communication.db.repo.ReposHolder
 import com.simplemoves.flibot.config.Configuration
 import com.typesafe.config.ConfigFactory
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.util.cio.*
+import io.ktor.utils.io.*
 
 private val logger = KotlinLogging.logger {}
 suspend fun main(args: Array<String>) {
@@ -15,16 +18,10 @@ suspend fun main(args: Array<String>) {
     val configuration = Configuration(config)
 
     MariaDbConnection(configuration.db)
+    val clientProvider = KHttpClientProvider()
+    val repos = ReposHolder()
 
-//    val clientProvider = KHttpClientProvider()
-    val seriesRepo = SeriesRepo()
-    val authorRepo = AuthorRepo()
-    val bookRepo = BookRepo()
-
-    val result = seriesRepo.findSeries("Столица мятежной окраины")
-    val result2 = authorRepo.findAuthor("Столица мятежной окраины")
-    val result3 = bookRepo.findBooks("Столица мятежной окраины")
-
-    logger.debug { result3 }
+    val telegramBot = TelegramBotHandler(configuration, repos, clientProvider)
+    telegramBot.bot.startPolling()
 }
 
