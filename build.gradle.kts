@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 val config_version: String by project
 val telegram_bot_version: String by project
 val consume_xml_version: String by project
@@ -16,6 +18,7 @@ val caffeine_version: String by project
 plugins {
     kotlin("jvm") version "1.9.10"
     application
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.simplemoves.flibot"
@@ -85,5 +88,15 @@ application {
 tasks.named("compileKotlin", org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask::class.java) {
     compilerOptions {
         freeCompilerArgs.add("-Xdebug")
+    }
+}
+
+tasks {
+    named<ShadowJar>("shadowJar") {
+        archiveBaseName.set(project.name)
+        mergeServiceFiles()
+        manifest {
+            attributes(mapOf("Main-Class" to "com.simplemoves.flibot.MainKt"))
+        }
     }
 }
