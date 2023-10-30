@@ -9,6 +9,7 @@ import com.github.kotlintelegrambot.dispatcher.*
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.ParseMode
+import com.github.kotlintelegrambot.entities.TelegramFile
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.extensions.filters.Filter
 import com.github.kotlintelegrambot.logging.LogLevel
@@ -17,6 +18,10 @@ import com.simplemoves.flibot.communication.db.repo.ReposHolder
 import com.simplemoves.flibot.communication.http.KHttpClientProvider
 import com.simplemoves.flibot.config.Configuration
 import com.simplemoves.flibot.representation.BooksPageRepresentation
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.util.cio.*
+import io.ktor.utils.io.*
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 
@@ -33,6 +38,7 @@ class TelegramBotHandler(configuration: Configuration, private val repos: ReposH
         .build()
 
     val BARREL_DOWNLOAD_REGEXP = """/barrel(?<cacheId>\d+)of(?<index>\d+)""".toRegex()
+    val BARREL_LINK_REGEXP = """/b/(?<bookId>\d+)/(?<format>(fb2|epub|mobi))""".toRegex()
     val PAGE_COMMAND_REGEXP = """/query/(?<cacheId>\d+)/page/(?<page>\d+)""".toRegex()
 
     val bot = bot {
@@ -64,6 +70,16 @@ class TelegramBotHandler(configuration: Configuration, private val repos: ReposH
                             }
                         }
                     }
+                    BARREL_LINK_REGEXP.matchEntire(data)?.groups?.let { groups ->
+                        val chatId = callbackQuery.message?.chat?.id ?: return@callbackQuery
+                        groups["bookId"]?.value?.run { toIntOrNull() }?.let { bookId ->
+                            groups["format"]?.value?.let { format ->
+                                val outputFile = configuration.tmpDir.resolve("$bookId.zip").toFile()
+                                val file = clientProvider.client.get("http://flibusta.site/b/$bookId/fb2").bodyAsChannel().copyAndClose(outputFile.writeChannel())
+                                bot.sendDocument(ChatId.fromId(chatId), TelegramFile.ByFile(outputFile))
+                            }
+                        }
+                    }
                 }
             }
             message(Filter.Command) {
@@ -84,8 +100,6 @@ class TelegramBotHandler(configuration: Configuration, private val repos: ReposH
                                             text = book.toTelegramExtendedMessage(),
                                             replyMarkup = inlineKeyboardMarkup,
                                             parseMode = ParseMode.MARKDOWN_V2)
-//                                        val outputFile = configuration.tmpDir.resolve("${book.id}.zip").toFile()
-//                                        val file = clientProvider.client.get("http://flibusta.site/b/${book.id}/fb2").bodyAsChannel().copyAndClose(outputFile.writeChannel())
                                     }
                                 }
                             }

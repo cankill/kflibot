@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  maria-db:
+    build:
+      context: maria-db
+      dockerfile: Dockerfile
+    container_name: maria-db
+    init: true
+    tty: true
+    stdin_open: true
+    ports:
+      - 3306:3306
+#    command: ./download.sh
+    environment:
+      - MARIADB_ROOT_PASSWORD=rootPassword
+      - MARIADB_DATABASE=flibot
+      - MARIADB_USER=sysadm
+      - MARIADB_PASSWORD=password_to_change
+
+  proxy:
+      image: osminogin/tor-simple
+      container_name: proxy
+      restart: always
+      ports:
+        - 9050:9050
