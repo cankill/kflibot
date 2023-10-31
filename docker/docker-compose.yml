@@ -10,6 +10,9 @@ services:
     stdin_open: true
     environment:
       - DB_HOST=maria-db
+      - DB_PORT
+      - PROXY_HOST=proxy
+      - PROXY_PORT
       - TELEGRAM_BOT_AUTH_KEY=6862350364:AAG0PDcjuKOgoB6izBNBysaQUNKII8x-QuQ
     depends_on:
       - maria-db

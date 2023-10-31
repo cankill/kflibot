@@ -1,5 +1,6 @@
 package com.simplemoves.flibot.communication.http
 
+import com.simplemoves.flibot.config.Configuration
 import io.ktor.client.*
 import io.ktor.client.engine.*
 import io.ktor.client.engine.okhttp.*
@@ -9,14 +10,14 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.xml.*
 
-class KHttpClientProvider {
+class KHttpClientProvider(configuration: Configuration) {
     val client = HttpClient(OkHttp) {
         followRedirects = true
 
         engine {
 //            sslContextFactory = SslContextFactory.Client()
 //            clientCacheSize = 12
-            proxy = ProxyBuilder.socks("0.0.0.0", 9050)
+            proxy = ProxyBuilder.socks(configuration.proxy.host, configuration.proxy.port)
         }
 
         install(HttpTimeout) {

@@ -6,10 +6,6 @@ import com.simplemoves.flibot.communication.db.repo.ReposHolder
 import com.simplemoves.flibot.config.Configuration
 import com.typesafe.config.ConfigFactory
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.util.cio.*
-import io.ktor.utils.io.*
 
 private val logger = KotlinLogging.logger {}
 suspend fun main(args: Array<String>) {
@@ -18,7 +14,7 @@ suspend fun main(args: Array<String>) {
     val configuration = Configuration(config)
 
     MariaDbConnection(configuration.db)
-    val clientProvider = KHttpClientProvider()
+    val clientProvider = KHttpClientProvider(configuration)
     val repos = ReposHolder()
 
     val telegramBot = TelegramBotHandler(configuration, repos, clientProvider)
