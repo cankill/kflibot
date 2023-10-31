@@ -28,6 +28,8 @@ class DbConfiguration(config: Config) {
 class ProxyConfiguration(config: Config) {
     val host = config.getString("host")
     val port = config.getInt("port")
+
+    override fun toString(): String = "$host:$port"
 }
 
 class TelegramBotConfiguration(config: Config) {

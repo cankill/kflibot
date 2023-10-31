@@ -30,7 +30,7 @@ data class BookModel (
     fun toTelegramMessage(queryKey: String, bookIndex: String): String {
         val seriesName = series?.toTelegramMessage()?.run { "\n$this" } ?: ""
         val author = author.toTelegramMessage()
-        val link = "\n"+"""Загрузить бочку рома: /barrel${queryKey}of$bookIndex"""
+        val link = "\n"+"""Бочка рома: /b${queryKey}i$bookIndex"""
         return """*$title* — $language$seriesName$author$link"""
     }
 

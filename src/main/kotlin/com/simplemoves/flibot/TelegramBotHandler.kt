@@ -39,7 +39,7 @@ class TelegramBotHandler(configuration: Configuration, private val repos: ReposH
         .expireAfterWrite(30.minutes.toJavaDuration())
         .build()
 
-    val BARREL_DOWNLOAD_REGEXP = """/barrel(?<cacheId>\d+)of(?<index>\d+)""".toRegex()
+    val BARREL_DOWNLOAD_REGEXP = """/b(?<cacheId>\d+)i(?<index>\d+)""".toRegex()
     val BARREL_LINK_REGEXP = """/b/(?<bookId>\d+)/(?<format>(fb2|epub|mobi))""".toRegex()
     val PAGE_COMMAND_REGEXP = """/query/(?<cacheId>\d+)/page/(?<page>\d+)""".toRegex()
 

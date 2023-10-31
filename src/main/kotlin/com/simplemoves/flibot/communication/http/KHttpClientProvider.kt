@@ -1,6 +1,7 @@
 package com.simplemoves.flibot.communication.http
 
 import com.simplemoves.flibot.config.Configuration
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.engine.*
 import io.ktor.client.engine.okhttp.*
@@ -10,8 +11,10 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.xml.*
 
+private val logger = KotlinLogging.logger {}
 class KHttpClientProvider(configuration: Configuration) {
     val client = HttpClient(OkHttp) {
+        logger.debug { "Starting the proxy: ${configuration.proxy}" }
         followRedirects = true
 
         engine {
@@ -32,7 +35,7 @@ class KHttpClientProvider(configuration: Configuration) {
 
         install(Logging) {
             logger = Logger.DEFAULT
-            level = LogLevel.ALL
+            level = LogLevel.HEADERS
             sanitizeHeader { header -> header == HttpHeaders.Authorization }
         }
     }
