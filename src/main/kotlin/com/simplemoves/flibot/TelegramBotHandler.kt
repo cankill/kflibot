@@ -7,17 +7,17 @@ import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.*
 import com.github.kotlintelegrambot.entities.ChatId
-import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.TelegramFile
-import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.extensions.filters.Filter
 import com.github.kotlintelegrambot.logging.LogLevel
 import com.simplemoves.flibot.communication.db.model.BookModel
 import com.simplemoves.flibot.communication.db.repo.ReposHolder
 import com.simplemoves.flibot.communication.http.KHttpClientProvider
 import com.simplemoves.flibot.config.Configuration
+import com.simplemoves.flibot.representation.BookDetailsRepresentation
 import com.simplemoves.flibot.representation.BooksPageRepresentation
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.util.cio.*
@@ -25,8 +25,10 @@ import io.ktor.utils.io.*
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 
+private val logger = KotlinLogging.logger {}
 class TelegramBotHandler(configuration: Configuration, private val repos: ReposHolder, clientProvider: KHttpClientProvider, botLogLevel: LogLevel = LogLevel.All()) {
     val booksPageRepresentation = BooksPageRepresentation(5)
+    val bookDetailsRepresentation = BookDetailsRepresentation()
     val queryCache: LoadingCache<String, List<BookModel>> = Caffeine.newBuilder()
         .maximumSize(1_000)
         .expireAfterWrite(30.minutes.toJavaDuration())
@@ -50,6 +52,7 @@ class TelegramBotHandler(configuration: Configuration, private val repos: ReposH
             callbackQuery {
                 callbackQuery.data.let { data ->
                     PAGE_COMMAND_REGEXP.matchEntire(data)?.groups?.let { groups ->
+                        logger.debug { "Paging for: $data request" }
                         groups["cacheId"]?.value?.let { cacheId ->
                             queryKeysCache.getIfPresent(cacheId)?.let { cacheKey ->
                                 groups["page"]?.value?.run { toIntOrNull() }?.let { currentPageNumber ->
@@ -59,6 +62,7 @@ class TelegramBotHandler(configuration: Configuration, private val repos: ReposH
 
                                         val (page, inlineKeyboardMarkup) = booksPageRepresentation.getPage(currentPageNumber, cacheId, books)
 
+                                        logger.debug { "Sending new rendered page for chatId: $chatId and messageId: $messageId" }
                                         bot.editMessageText(
                                             ChatId.fromId(chatId),
                                             messageId,
@@ -71,11 +75,13 @@ class TelegramBotHandler(configuration: Configuration, private val repos: ReposH
                         }
                     }
                     BARREL_LINK_REGEXP.matchEntire(data)?.groups?.let { groups ->
+                        logger.debug { "Downloading a file for: $data request" }
                         val chatId = callbackQuery.message?.chat?.id ?: return@callbackQuery
                         groups["bookId"]?.value?.run { toIntOrNull() }?.let { bookId ->
                             groups["format"]?.value?.let { format ->
                                 val outputFile = configuration.tmpDir.resolve("$bookId.zip").toFile()
                                 val file = clientProvider.client.get("http://flibusta.site/b/$bookId/fb2").bodyAsChannel().copyAndClose(outputFile.writeChannel())
+                                logger.debug { "File downloaded in: ${outputFile.path}" }
                                 bot.sendDocument(ChatId.fromId(chatId), TelegramFile.ByFile(outputFile))
                             }
                         }
@@ -85,19 +91,17 @@ class TelegramBotHandler(configuration: Configuration, private val repos: ReposH
             message(Filter.Command) {
                 message.text?.let { text ->
                     BARREL_DOWNLOAD_REGEXP.matchEntire(text)?.groups?.let { groups ->
+                        logger.debug { "Book details with download links for: $text" }
                         groups["cacheId"]?.value?.let { cacheId ->
                             queryKeysCache.getIfPresent(cacheId)?.let { cacheKey ->
                                 groups["index"]?.value?.run { toIntOrNull() }?.let { index ->
                                     queryCache.get(cacheKey)?.get(index)?.let { book ->
-                                        val bookUrl = "/b/${book.id}"
-                                        val inlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
-                                            InlineKeyboardButton.CallbackData(text = "fb2", callbackData = "$bookUrl/fb2"),
-                                            InlineKeyboardButton.CallbackData(text = "epub", callbackData = "$bookUrl/epub"),
-                                            InlineKeyboardButton.CallbackData(text = "mobi", callbackData = "$bookUrl/mobi"))
+                                        val (page, inlineKeyboardMarkup) = bookDetailsRepresentation.getPage(book)
 
+                                        logger.debug { "Book details with download links rendered for cacheId: $cacheId and index: $index" }
                                         bot.sendMessage(
                                             ChatId.fromId(message.chat.id),
-                                            text = book.toTelegramExtendedMessage(),
+                                            text = page,
                                             replyMarkup = inlineKeyboardMarkup,
                                             parseMode = ParseMode.MARKDOWN_V2)
                                     }
@@ -109,11 +113,13 @@ class TelegramBotHandler(configuration: Configuration, private val repos: ReposH
             }
             message(Filter.Text) {
                 message.text?.let { query ->
+                    logger.debug { "Start search for the query: $query" }
                     val books = queryCache.get(query)
                     val queryKey = query.hashCode().toUInt().toString()
                     queryKeysCache.put(queryKey, query)
                     val (page, inlineKeyboardMarkup) = booksPageRepresentation.getPage(0, queryKey, books)
 
+                    logger.debug { "Page rendered and ready to be send for the query: $query" }
                     bot.sendMessage(
                         ChatId.fromId(message.chat.id),
                         text = page,
@@ -122,7 +128,7 @@ class TelegramBotHandler(configuration: Configuration, private val repos: ReposH
                 }
             }
             telegramError {
-                println(error.getErrorMessage())
+                logger.error { error.getErrorMessage() }
             }
         }
     }
