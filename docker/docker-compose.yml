@@ -15,8 +15,10 @@ services:
       - PROXY_PORT
       - TELEGRAM_BOT_AUTH_KEY=6862350364:AAG0PDcjuKOgoB6izBNBysaQUNKII8x-QuQ
     depends_on:
-      - maria-db
-      - proxy
+      maria-db:
+        condition: service_healthy
+      proxy:
+        condition: service_healthy
 
   maria-db:
     build:
@@ -34,6 +36,10 @@ services:
       - MARIADB_DATABASE=flibot
       - MARIADB_USER=sysadm
       - MARIADB_PASSWORD=password_to_change
+    healthcheck:
+      test: [ "CMD", "mariadb-admin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
 
   proxy:
       image: osminogin/tor-simple

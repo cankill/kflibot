@@ -26,7 +26,7 @@ class KHttpClientProvider(configuration: Configuration) {
         install(HttpTimeout) {
             socketTimeoutMillis = 10_000
             connectTimeoutMillis = 10_000
-            requestTimeoutMillis = 10_000
+            requestTimeoutMillis = 60_000
         }
 
         install(ContentNegotiation) {
@@ -35,7 +35,7 @@ class KHttpClientProvider(configuration: Configuration) {
 
         install(Logging) {
             logger = Logger.DEFAULT
-            level = LogLevel.HEADERS
+            level = LogLevel.NONE
             sanitizeHeader { header -> header == HttpHeaders.Authorization }
         }
     }
