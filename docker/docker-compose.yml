@@ -37,7 +37,7 @@ services:
       - MARIADB_USER=sysadm
       - MARIADB_PASSWORD=password_to_change
     healthcheck:
-      test: [ "CMD", "mariadb-admin" ,"ping", "-h", "localhost" ]
+      test: [ "CMD", "mariadb-admin", "-prootPassword" ,"ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
 
