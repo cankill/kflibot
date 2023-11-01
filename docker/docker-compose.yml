@@ -24,21 +24,23 @@ services:
     build:
       context: maria-db
       dockerfile: Dockerfile
+      args:
+        - MARIADB_ROOT_PASSWORD
+        - MARIADB_DATABASE
+        - MARIADB_USER
+        - MARIADB_PASSWORD
     container_name: maria-db
     init: true
     tty: true
     stdin_open: true
-#    ports:
-#      - 3306:3306
-#    command: ./download.sh
     environment:
-      - MARIADB_ROOT_PASSWORD=rootPassword
-      - MARIADB_DATABASE=flibot
-      - MARIADB_USER=sysadm
-      - MARIADB_PASSWORD=password_to_change
+      - MARIADB_ROOT_PASSWORD
+      - MARIADB_DATABASE
+      - MARIADB_USER
+      - MARIADB_PASSWORD
     healthcheck:
       test: [ "CMD", "mariadb-admin", "-prootPassword" ,"ping", "-h", "localhost" ]
-      timeout: 20s
+      timeout: 10s
       retries: 10
 
   proxy:
@@ -46,16 +48,3 @@ services:
       container_name: proxy
       restart: always
       stdin_open: true
-#      ports:
-#        - 9050:9050
-
-#      depends_on:
-#        - nginx
-
-#  nginx:
-#    image: nginx
-#    restart: always
-##    links:
-##      - drupal:drupalhost
-#    volumes:
-#      - nginx/nginx.conf:/etc/nginx/nginx.conf:ro
