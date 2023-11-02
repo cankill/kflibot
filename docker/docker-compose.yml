@@ -40,7 +40,7 @@ services:
       - MARIADB_PASSWORD
     healthcheck:
       test: [ "CMD", "mariadb-admin", "-prootPassword" ,"ping", "-h", "localhost" ]
-      timeout: 10s
+      timeout: 3s
       retries: 10
 
   proxy:
