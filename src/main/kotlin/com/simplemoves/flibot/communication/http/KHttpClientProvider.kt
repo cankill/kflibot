@@ -33,10 +33,10 @@ class KHttpClientProvider(configuration: Configuration) {
             xml()
         }
 
-//        install(Logging) {
-//            logger = Logger.DEFAULT
-//            level = LogLevel.NONE
-//            sanitizeHeader { header -> header == HttpHeaders.Authorization }
-//        }
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.HEADERS
+            sanitizeHeader { header -> header == HttpHeaders.Authorization }
+        }
     }
 }

@@ -13,8 +13,16 @@ declare -a files=("lib.libavtor.sql.gz"
                   "lib.libseqname.sql.gz"
                   "lib.libseq.sql.gz")
 
-for name in "${files[@]}"
-do
-  curl https://flibusta.site/sql/$name --output /docker-entrypoint-initdb.d/$name
-  gunzip -f /docker-entrypoint-initdb.d/$name
+downloadSQL() {
+  local filename=$1
+  curl -s https://flibusta.site/sql/$filename --output /docker-entrypoint-initdb.d/$filename
+}
+
+for name in "${files[@]}"; do
+  downloadSQL "$name" &
+  downloadPids="$downloadPids $!"
 done
+
+wait $downloadPids
+
+gunzip -f /docker-entrypoint-initdb.d/*.sql.gz

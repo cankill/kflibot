@@ -26,7 +26,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 
 private val logger = KotlinLogging.logger {}
-class TelegramBotHandler(configuration: Configuration, private val repos: ReposHolder, clientProvider: KHttpClientProvider, botLogLevel: LogLevel = LogLevel.All()) {
+class TelegramBotHandler(configuration: Configuration, private val repos: ReposHolder, clientProvider: KHttpClientProvider, botLogLevel: LogLevel = LogLevel.Network.Headers) {
     val booksPageRepresentation = BooksPageRepresentation(5)
     val bookDetailsRepresentation = BookDetailsRepresentation()
     val queryCache: LoadingCache<String, List<BookModel>> = Caffeine.newBuilder()

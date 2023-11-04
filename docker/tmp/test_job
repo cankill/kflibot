@@ -1,0 +1,4 @@
+* * * * * mysql --password=$password --host=$host --execute "INSERT INTO flibot.cronTable (description) VALUES ('Hi\!');"
+
+
+#* * * * * /download.sh > /dev/stdout

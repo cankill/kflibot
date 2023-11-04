@@ -9,15 +9,35 @@ services:
     tty: true
     stdin_open: true
     environment:
-      - DB_HOST=maria-db
+      - DB_HOST
       - DB_PORT
-      - PROXY_HOST=proxy
+      - PROXY_HOST
       - PROXY_PORT
-      - TELEGRAM_BOT_AUTH_KEY=6862350364:AAG0PDcjuKOgoB6izBNBysaQUNKII8x-QuQ
+      - TELEGRAM_BOT_AUTH_KEY
     depends_on:
       maria-db:
         condition: service_healthy
       proxy:
+        condition: service_healthy
+
+  db-updater:
+    build:
+      context: db-updater
+      dockerfile: Dockerfile
+      args:
+        - DB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+        - DB_HOST
+        - DB_NAME=${MARIADB_DATABASE}
+    container_name: db-updater
+    init: true
+    tty: true
+    stdin_open: true
+    environment:
+      - DB_NAME=${MARIADB_DATABASE}
+      - DB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - DB_HOST
+    depends_on:
+      maria-db:
         condition: service_healthy
 
   maria-db:
@@ -39,7 +59,9 @@ services:
       - MARIADB_USER
       - MARIADB_PASSWORD
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "-prootPassword" ,"ping", "-h", "localhost" ]
+      test: [ "CMD", "mariadb-admin", "--password=$MARIADB_ROOT_PASSWORD" ,"ping", "-h", "localhost" ]
+      start_period: 3s
+      interval: 3s
       timeout: 3s
       retries: 10
 

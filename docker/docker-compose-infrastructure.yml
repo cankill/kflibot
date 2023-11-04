@@ -1,5 +1,25 @@
 version: '3.9'
 services:
+  db-updater:
+    build:
+      context: db-updater
+      dockerfile: Dockerfile
+      args:
+        - DB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+        - DB_HOST
+        - DB_NAME=${MARIADB_DATABASE}
+    container_name: db-updater
+    init: true
+    tty: true
+    stdin_open: true
+    environment:
+      - DB_NAME=${MARIADB_DATABASE}
+      - DB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - DB_HOST
+    depends_on:
+      maria-db:
+        condition: service_healthy
+
   maria-db:
     build:
       context: maria-db
@@ -21,8 +41,10 @@ services:
       - MARIADB_USER
       - MARIADB_PASSWORD
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "-prootPassword" ,"ping", "-h", "localhost" ]
-      timeout: 10s
+      test: [ "CMD", "mariadb-admin", "--password=$MARIADB_ROOT_PASSWORD" ,"ping", "-h", "localhost" ]
+      start_period: 3s
+      interval: 3s
+      timeout: 3s
       retries: 10
 
   proxy:
