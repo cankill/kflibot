@@ -2,7 +2,6 @@ package com.simplemoves.flibot.communication.db.repo
 
 import com.simplemoves.flibot.communication.db.model.BookModel
 import com.simplemoves.flibot.communication.db.table.*
-import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
@@ -57,7 +56,6 @@ class AuthorRepo {
 
                     BookModel.fromRow(bookJoinRow, rating)
                 }
-
 
             res
         }

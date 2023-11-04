@@ -3,7 +3,6 @@ package com.simplemoves.flibot.representation
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.simplemoves.flibot.communication.db.model.BookModel
-import com.simplemoves.flibot.utils.escapeMarkdown
 import kotlin.math.ceil
 import kotlin.math.min
 

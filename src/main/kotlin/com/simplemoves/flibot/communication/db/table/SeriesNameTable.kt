@@ -1,6 +1,5 @@
 package com.simplemoves.flibot.communication.db.table
 
-import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.dao.id.IntIdTable
 
 object SeriesNameTable: IntIdTable("libseqname", "SeqId"){

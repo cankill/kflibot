@@ -1,6 +1,6 @@
 package com.simplemoves.flibot.communication.db.model
 
-import com.simplemoves.flibot.communication.db.table.*
+import com.simplemoves.flibot.communication.db.table.BookTable
 import com.simplemoves.flibot.utils.escapeMarkdown
 import org.jetbrains.exposed.sql.ResultRow
 
